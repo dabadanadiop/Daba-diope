@@ -78,8 +78,8 @@ const PROJECTS: Project[] = [
     solution: "Création d'un Design System sous Figma aux teintes végétales et éco-responsables, intégrant des filtres intelligents par catégorie de produits, un panier interactif et une ergonomie adaptée au mobile.",
     tools: ["Figma", "Design System", "Wireframing UX", "Canva Pro"],
     deliverables: ["Charte graphique complète (PDF)", "Maquettes UI Web & Mobile haute-fidélité", "Prototype interactif cliquable", "Kit de promotion digitale"],
-    image: "/photo/tollu-daba-cover.jpg",
-    thumbnail: "/photo/tollu-daba-cover.jpg",
+    image: "/photo/charte-graphique-tollu-daba.pdf",
+    thumbnail: "/photo/charte-graphique-tollu-daba.pdf",
     pdfLink: "/photo/charte-graphique-tollu-daba.pdf",
     imageAlt: "Projet Tollou Daba - Charte graphique et interface UX/UI agroécologique par Daba Diop",
     featured: true,
@@ -796,7 +796,7 @@ function Hero({ onCopyEmail }: { onCopyEmail: () => void }) {
               {/* Main Photo Card */}
               <div className="relative w-72 h-96 sm:w-80 sm:h-[440px] rounded-3xl overflow-hidden bg-[var(--color-rose-pale)] border-2 border-white shadow-2xl">
                 <img
-                  src="/photo/ODC-Shoot-P8-2026 12.jpg"
+                  src="/photo/ODC-Shoot-P8-2026-12.jpg"
                   alt="Daba Diop - Portrait professionnel Référente digitale & UX/UI Designer"
                   className="w-full h-full object-cover object-top hover:scale-105 transition-transform duration-700 ease-out"
                   loading="eager"
