@@ -23,6 +23,8 @@ interface Project {
   video?: string;      // local /photo/xxx.mp4
   thumbnail?: string;  // local /photo/xxx-thumb.jpg
   pdfLink?: string;    // local /photo/xxx.pdf
+  secondaryImage?: string;
+  secondaryImageTitle?: string;
   featured?: boolean;
 }
 
@@ -167,6 +169,8 @@ const PROJECTS: Project[] = [
     deliverables: ["Moodboard d'inspiration visuelle", "Planche de style (Style Sheet) complète", "Palette couleurs & typographies", "Règles d'usage & déclinaisons"],
     image: "/photo/moodboard-daba.jpg",
     thumbnail: "/photo/moodboard-daba.jpg",
+    secondaryImage: "/photo/sheet-daba.jpg",
+    secondaryImageTitle: "Planche de Style (Brandguideline Sheet YOUPY)",
     imageAlt: "Moodboard et planche de style direction artistique par Daba Diop",
   },
 ];
@@ -341,6 +345,14 @@ function ProjectModal({
   project: Project | null;
   onClose: () => void;
 }) {
+  const [activeImage, setActiveImage] = useState<string>(project?.image || "");
+
+  useEffect(() => {
+    if (project) {
+      setActiveImage(project.image);
+    }
+  }, [project]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -389,44 +401,83 @@ function ProjectModal({
         {/* Scrollable Content */}
         <div className="overflow-y-auto p-6 sm:p-8 space-y-8">
           {/* Main video or image banner */}
-          <div className="relative aspect-video rounded-2xl overflow-hidden bg-[var(--color-warm-muted)] border border-[var(--color-warm-border)] shadow-inner">
-            {project.video ? (
-              <video
-                src={project.video}
-                poster={project.thumbnail || project.image}
-                controls
-                className="w-full h-full object-cover"
-                preload="metadata"
-              />
-            ) : project.image.endsWith(".pdf") ? (
-              <div className="w-full h-full flex flex-col items-center justify-center p-8 bg-[var(--color-warm-white)] text-center">
-                <div className="w-20 h-20 rounded-2xl bg-[var(--color-rose-pale)] border border-[var(--color-rose-blush)] flex items-center justify-center mb-4">
-                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-[var(--color-rose-primary)]">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                    <polyline points="14 2 14 8 20 8" />
-                    <line x1="16" y1="13" x2="8" y2="13" />
-                    <line x1="16" y1="17" x2="8" y2="17" />
-                    <polyline points="10 9 9 9 8 9" />
-                  </svg>
-                </div>
-                <p className="font-body text-lg text-[var(--color-ink)] font-semibold mb-2">Charte Graphique PDF</p>
-                <p className="font-body text-sm text-[var(--color-ink-muted)] mb-4">Cliquez sur le bouton ci-dessous pour consulter</p>
-                <a
-                  href={project.pdfLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 bg-[var(--color-rose-primary)] text-white px-5 py-2.5 rounded-full text-sm font-medium hover:bg-[var(--color-rose-deep)] transition-all shadow-sm"
+          <div>
+            <div className="relative aspect-video rounded-2xl overflow-hidden bg-neutral-950 border border-[var(--color-warm-border)] shadow-inner flex items-center justify-center">
+              {project.video ? (
+                <video
+                  src={project.video}
+                  poster={project.thumbnail || project.image}
+                  controls
+                  playsInline
+                  preload="metadata"
+                  className="w-full h-full object-contain"
                 >
-                  📄 Voir la charte PDF
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
-                </a>
+                  <source src={project.video} type="video/mp4" />
+                  Votre navigateur ne supporte pas la lecture directe de cette vidéo.
+                </video>
+              ) : project.image && project.image.endsWith(".pdf") ? (
+                <div className="w-full h-full flex flex-col items-center justify-center p-8 bg-[var(--color-warm-white)] text-center">
+                  <div className="w-20 h-20 rounded-2xl bg-[var(--color-rose-pale)] border border-[var(--color-rose-blush)] flex items-center justify-center mb-4">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-[var(--color-rose-primary)]">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                      <polyline points="14 2 14 8 20 8" />
+                      <line x1="16" y1="13" x2="8" y2="13" />
+                      <line x1="16" y1="17" x2="8" y2="17" />
+                      <polyline points="10 9 9 9 8 9" />
+                    </svg>
+                  </div>
+                  <p className="font-body text-lg text-[var(--color-ink)] font-semibold mb-2">Charte Graphique PDF</p>
+                  <p className="font-body text-sm text-[var(--color-ink-muted)] mb-4">Consultez le document officiel en haute définition</p>
+                  <a
+                    href={project.pdfLink || project.image}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 bg-[var(--color-rose-primary)] text-white px-5 py-2.5 rounded-full text-sm font-medium hover:bg-[var(--color-rose-deep)] transition-all shadow-sm"
+                  >
+                    📄 Ouvrir la charte PDF
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
+                  </a>
+                </div>
+              ) : (
+                <img
+                  src={activeImage || project.image}
+                  alt={project.imageAlt}
+                  className="w-full h-full object-contain"
+                  onError={(e) => {
+                    if (project.thumbnail && e.currentTarget.src !== project.thumbnail) {
+                      e.currentTarget.src = project.thumbnail;
+                    }
+                  }}
+                />
+              )}
+            </div>
+
+            {/* Multiple visuals tabs if project has secondary image */}
+            {project.secondaryImage && (
+              <div className="flex flex-wrap items-center gap-2 mt-3">
+                <button
+                  type="button"
+                  onClick={() => setActiveImage(project.image)}
+                  className={`px-4 py-2 rounded-full text-xs font-semibold transition-all ${
+                    activeImage === project.image
+                      ? "bg-[var(--color-rose-primary)] text-white shadow-sm"
+                      : "bg-white border border-[var(--color-warm-border)] text-[var(--color-ink)] hover:border-[var(--color-rose-primary)]"
+                  }`}
+                >
+                  🖼️ Moodboard d'inspiration
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveImage(project.secondaryImage!)}
+                  className={`px-4 py-2 rounded-full text-xs font-semibold transition-all ${
+                    activeImage === project.secondaryImage
+                      ? "bg-[var(--color-rose-primary)] text-white shadow-sm"
+                      : "bg-white border border-[var(--color-warm-border)] text-[var(--color-ink)] hover:border-[var(--color-rose-primary)]"
+                  }`}
+                >
+                  📐 {project.secondaryImageTitle || "Planche de Style"}
+                </button>
               </div>
-            ) : (
-              <img
-                src={project.image}
-                alt={project.imageAlt}
-                className="w-full h-full object-cover"
-              />
             )}
           </div>
 
@@ -839,6 +890,11 @@ function Hero({ onCopyEmail }: { onCopyEmail: () => void }) {
                   alt="Daba Diop - Portrait professionnel Référente digitale & UX/UI Designer"
                   className="w-full h-full object-cover object-top hover:scale-105 transition-transform duration-700 ease-out"
                   loading="eager"
+                  onError={(e) => {
+                    if (e.currentTarget.src !== "/photo/ODC-Shoot-P8-2026 12.jpg") {
+                      e.currentTarget.src = "/photo/ODC-Shoot-P8-2026 12.jpg";
+                    }
+                  }}
                 />
                 
                 {/* Refined Ambient Overlay */}
@@ -1245,10 +1301,24 @@ function Projects({ onSelectProject }: { onSelectProject: (p: Project) => void }
               {/* Image / video thumbnail banner */}
               <div className="relative aspect-[16/10] overflow-hidden bg-[var(--color-warm-muted)]">
                 <img
-                  src={project.thumbnail || project.image}
+                  src={
+                    project.thumbnail && !project.thumbnail.endsWith(".pdf")
+                      ? project.thumbnail
+                      : !project.image.endsWith(".pdf")
+                      ? project.image
+                      : "/photo/tollu-daba-cover.jpg"
+                  }
                   alt={project.imageAlt}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
                   loading="lazy"
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    if (project.image && !project.image.endsWith(".pdf") && target.src !== project.image) {
+                      target.src = project.image;
+                    } else if (target.src !== "/photo/tollu-daba-cover.jpg") {
+                      target.src = "/photo/tollu-daba-cover.jpg";
+                    }
+                  }}
                 />
                 <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs font-bold text-[var(--color-rose-deep)] shadow-xs">
                   {project.categoryLabel}
@@ -1256,6 +1326,12 @@ function Projects({ onSelectProject }: { onSelectProject: (p: Project) => void }
                 <div className="absolute top-4 right-4 bg-black/70 backdrop-blur-md text-white px-3 py-1 rounded-full text-xs font-mono">
                   #{project.number}
                 </div>
+                {project.pdfLink && !project.video && (
+                  <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-[11px] font-semibold text-[var(--color-ink)] shadow-xs flex items-center gap-1.5">
+                    <span>📄</span>
+                    <span>Charte PDF</span>
+                  </div>
+                )}
                 {project.video && (
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <div className="w-14 h-14 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center shadow-xl">
