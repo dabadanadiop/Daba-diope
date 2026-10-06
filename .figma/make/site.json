@@ -1,0 +1,10 @@
+{
+  "description": "Showcase your digital expertise with a modern, responsive portfolio designed for Daba Diop, highlighting skills in graphic design and UX/UI.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
