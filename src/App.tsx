@@ -382,6 +382,12 @@ function ProjectModal({
                 className="w-full h-full object-cover"
                 preload="metadata"
               />
+            ) : project.image.endsWith(".pdf") ? (
+              <iframe
+                src={project.image}
+                className="w-full h-full border-0"
+                title={project.imageAlt}
+              />
             ) : (
               <img
                 src={project.image}
