@@ -79,11 +79,12 @@ const PROJECTS: Project[] = [
     challenge: "Offrir un parcours utilisateur simple et rapide permettant aux consommateurs de découvrir les récoltes de saison et composer leur panier maraîcher en quelques clics.",
     solution: "Création d'un Design System sous Figma aux teintes végétales et éco-responsables, intégrant des filtres intelligents par catégorie de produits, un panier interactif et une ergonomie adaptée au mobile.",
     tools: ["Figma", "Design System", "Wireframing UX", "Canva Pro"],
-    deliverables: ["Charte graphique complète (PDF)", "Maquettes UI Web & Mobile haute-fidélité", "Prototype interactif cliquable", "Kit de promotion digitale"],
-    image: "/photo/tollu-daba-cover.jpg",
-    thumbnail: "/photo/tollu-daba-cover.jpg",
+    deliverables: ["Charte graphique complète (PDF)", "Vidéo de présentation officielle (MP4)", "Maquettes UI Web & Mobile haute-fidélité", "Prototype interactif cliquable"],
+    image: "/photo/tollou-thumb.jpg",
+    thumbnail: "/photo/tollou-thumb.jpg",
+    video: "/photo/tollou.mp4",
     pdfLink: "/photo/charte-graphique-tollu-daba.pdf",
-    imageAlt: "Projet Tollou Daba - Charte graphique et interface UX/UI agroécologique par Daba Diop",
+    imageAlt: "Projet Tollou Daba - Présentation vidéo et charte graphique agroécologique par Daba Diop",
     featured: true,
   },
   {
@@ -1247,6 +1248,87 @@ function Services() {
   );
 }
 
+/* ─── Project Card Media Component ───────────────────────────────────── */
+function ProjectCardMedia({ project }: { project: Project }) {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  const handleMouseEnter = () => {
+    if (videoRef.current) {
+      videoRef.current.play().catch(() => {});
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+    }
+  };
+
+  return (
+    <div
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      className="relative aspect-[16/10] overflow-hidden bg-[var(--color-warm-muted)]"
+    >
+      {project.video ? (
+        <video
+          ref={videoRef}
+          src={project.video}
+          poster={project.thumbnail || project.image}
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+        />
+      ) : (
+        <img
+          src={
+            project.thumbnail && !project.thumbnail.endsWith(".pdf")
+              ? project.thumbnail
+              : !project.image.endsWith(".pdf")
+              ? project.image
+              : "/photo/tollou-thumb.jpg"
+          }
+          alt={project.imageAlt}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+          loading="lazy"
+          onError={(e) => {
+            const target = e.currentTarget;
+            if (project.image && !project.image.endsWith(".pdf") && target.src !== project.image) {
+              target.src = project.image;
+            } else if (target.src !== "/photo/tollou-thumb.jpg") {
+              target.src = "/photo/tollou-thumb.jpg";
+            }
+          }}
+        />
+      )}
+      <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs font-bold text-[var(--color-rose-deep)] shadow-xs pointer-events-none">
+        {project.categoryLabel}
+      </div>
+      <div className="absolute top-4 right-4 bg-black/70 backdrop-blur-md text-white px-3 py-1 rounded-full text-xs font-mono pointer-events-none">
+        #{project.number}
+      </div>
+      {project.pdfLink && (
+        <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-[11px] font-semibold text-[var(--color-ink)] shadow-xs flex items-center gap-1.5 pointer-events-none">
+          <span>📄</span>
+          <span>Charte PDF</span>
+        </div>
+      )}
+      {project.video && (
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+          <div className="w-14 h-14 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center shadow-xl">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="text-[var(--color-rose-primary)] ml-1">
+              <polygon points="5 3 19 12 5 21 5 3" />
+            </svg>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ─── Projects Section ───────────────────────────────────────────────── */
 function Projects({ onSelectProject }: { onSelectProject: (p: Project) => void }) {
   const [filter, setFilter] = useState<string>("all");
@@ -1298,48 +1380,8 @@ function Projects({ onSelectProject }: { onSelectProject: (p: Project) => void }
               onClick={() => onSelectProject(project)}
               className="group cursor-pointer card-luxury rounded-3xl overflow-hidden flex flex-col justify-between"
             >
-              {/* Image / video thumbnail banner */}
-              <div className="relative aspect-[16/10] overflow-hidden bg-[var(--color-warm-muted)]">
-                <img
-                  src={
-                    project.thumbnail && !project.thumbnail.endsWith(".pdf")
-                      ? project.thumbnail
-                      : !project.image.endsWith(".pdf")
-                      ? project.image
-                      : "/photo/tollu-daba-cover.jpg"
-                  }
-                  alt={project.imageAlt}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
-                  loading="lazy"
-                  onError={(e) => {
-                    const target = e.currentTarget;
-                    if (project.image && !project.image.endsWith(".pdf") && target.src !== project.image) {
-                      target.src = project.image;
-                    } else if (target.src !== "/photo/tollu-daba-cover.jpg") {
-                      target.src = "/photo/tollu-daba-cover.jpg";
-                    }
-                  }}
-                />
-                <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs font-bold text-[var(--color-rose-deep)] shadow-xs">
-                  {project.categoryLabel}
-                </div>
-                <div className="absolute top-4 right-4 bg-black/70 backdrop-blur-md text-white px-3 py-1 rounded-full text-xs font-mono">
-                  #{project.number}
-                </div>
-                {project.pdfLink && !project.video && (
-                  <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-[11px] font-semibold text-[var(--color-ink)] shadow-xs flex items-center gap-1.5">
-                    <span>📄</span>
-                    <span>Charte PDF</span>
-                  </div>
-                )}
-                {project.video && (
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <div className="w-14 h-14 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center shadow-xl">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="text-[var(--color-rose-primary)] ml-1"><polygon points="5 3 19 12 5 21 5 3" /></svg>
-                    </div>
-                  </div>
-                )}
-              </div>
+              {/* Image / video thumbnail banner with hover preview */}
+              <ProjectCardMedia project={project} />
 
               {/* Text content */}
               <div className="p-7 space-y-4">
