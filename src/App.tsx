@@ -23,6 +23,8 @@ interface Project {
   video?: string;      // local /photo/xxx.mp4
   thumbnail?: string;  // local /photo/xxx-thumb.jpg
   pdfLink?: string;    // local /photo/xxx.pdf
+  moodboard?: string;  // local /photo/xxx-moodboard.jpg
+  moodboardTitle?: string;
   secondaryImage?: string;
   secondaryImageTitle?: string;
   featured?: boolean;
@@ -73,18 +75,26 @@ const PROJECTS: Project[] = [
     number: "02",
     category: "UX/UI",
     categoryLabel: "UX/UI Design & Charte Graphique",
-    title: "Tollou Daba — Charte Graphique & Expérience Agroécologique",
-    shortDesc: "Création de la charte graphique complète et conception UX/UI d'une plateforme intuitive de commande de récoltes fraîches.",
-    fullDesc: "Design d'interface web et mobile pour 'Tollou Daba' (Le verger & champ de Daba), une initiative agroécologique dédiée à la distribution directe de paniers bio et produits frais du terroir sénégalais. La charte graphique officielle PDF est livrée avec le projet.",
-    challenge: "Offrir un parcours utilisateur simple et rapide permettant aux consommateurs de découvrir les récoltes de saison et composer leur panier maraîcher en quelques clics.",
-    solution: "Création d'un Design System sous Figma aux teintes végétales et éco-responsables, intégrant des filtres intelligents par catégorie de produits, un panier interactif et une ergonomie adaptée au mobile.",
-    tools: ["Figma", "Design System", "Wireframing UX", "Canva Pro"],
-    deliverables: ["Charte graphique complète (PDF)", "Vidéo de présentation officielle (MP4)", "Maquettes UI Web & Mobile haute-fidélité", "Prototype interactif cliquable"],
+    title: "Tollou Daba — Charte Graphique, Moodboard & Expérience Agroécologique",
+    shortDesc: "Direction artistique complète, moodboard officiel (#FBC02D & #045630), charte graphique et conception UX/UI pour récoltes maraîchères fraîches.",
+    fullDesc: "Conception globale de l'identité visuelle et de l'expérience digitale pour 'Tollou Daba' (Le verger & champ de Daba), une initiative agroécologique dédiée à la valorisation des récoltes maraîchères et bio du terroir sénégalais. Le projet intègre le moodboard officiel (teintes ocre solaire #FBC02D et vert végétal #045630), la vidéo de présentation et la charte graphique complète PDF.",
+    challenge: "Offrir un parcours utilisateur simple et rapide permettant aux consommateurs de découvrir les récoltes de saison et composer leur panier maraîcher en quelques clics tout en valorisant l'authenticité de la terre.",
+    solution: "Élaboration d'un moodboard d'inspiration agricole vibrant, création d'un Design System sous Figma aux teintes végétales et éco-responsables, filtres intelligents et ergonomie mobile fluide.",
+    tools: ["Figma", "Moodboard & DA", "Design System", "Wireframing UX", "Canva Pro"],
+    deliverables: [
+      "Moodboard officiel de direction artistique (HD)",
+      "Vidéo de présentation officielle (MP4)",
+      "Charte graphique complète (PDF)",
+      "Maquettes UI Web & Mobile haute-fidélité",
+      "Prototype interactif cliquable",
+    ],
     image: "/photo/tollou-thumb.jpg",
     thumbnail: "/photo/tollou-thumb.jpg",
     video: "/photo/tollou.mp4",
+    moodboard: "/photo/tollu-moodboard.jpg",
+    moodboardTitle: "Moodboard Officiel Tollou Daba",
     pdfLink: "/photo/charte-graphique-tollu-daba.pdf",
-    imageAlt: "Projet Tollou Daba - Présentation vidéo et charte graphique agroécologique par Daba Diop",
+    imageAlt: "Projet Tollou Daba - Présentation vidéo, moodboard et charte graphique agroécologique par Daba Diop",
     featured: true,
   },
   {
@@ -170,6 +180,8 @@ const PROJECTS: Project[] = [
     deliverables: ["Moodboard d'inspiration visuelle", "Planche de style (Style Sheet) complète", "Palette couleurs & typographies", "Règles d'usage & déclinaisons"],
     image: "/photo/moodboard-daba.jpg",
     thumbnail: "/photo/moodboard-daba.jpg",
+    moodboard: "/photo/moodboard-daba.jpg",
+    moodboardTitle: "Moodboard d'inspiration YOUPY",
     secondaryImage: "/photo/sheet-daba.jpg",
     secondaryImageTitle: "Planche de Style (Brandguideline Sheet YOUPY)",
     imageAlt: "Moodboard et planche de style direction artistique par Daba Diop",
@@ -346,17 +358,34 @@ function ProjectModal({
   project: Project | null;
   onClose: () => void;
 }) {
-  const [activeImage, setActiveImage] = useState<string>(project?.image || "");
+  const [activeMedia, setActiveMedia] = useState<"video" | "moodboard" | "secondary" | "image" | "pdf">("video");
+  const [lightboxImage, setLightboxImage] = useState<string | null>(null);
 
   useEffect(() => {
     if (project) {
-      setActiveImage(project.image);
+      if (project.video) {
+        setActiveMedia("video");
+      } else if (project.moodboard) {
+        setActiveMedia("moodboard");
+      } else if (project.secondaryImage) {
+        setActiveMedia("secondary");
+      } else if (project.image && !project.image.endsWith(".pdf")) {
+        setActiveMedia("image");
+      } else {
+        setActiveMedia("pdf");
+      }
     }
   }, [project]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        if (lightboxImage) {
+          setLightboxImage(null);
+        } else {
+          onClose();
+        }
+      }
     };
     if (project) {
       document.body.style.overflow = "hidden";
@@ -366,219 +395,420 @@ function ProjectModal({
       document.body.style.overflow = "unset";
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [project, onClose]);
+  }, [project, onClose, lightboxImage]);
 
   if (!project) return null;
 
+  // Determine available media tabs
+  const mediaTabs: { id: "video" | "moodboard" | "secondary" | "image" | "pdf"; label: string; icon: string }[] = [];
+  if (project.video) {
+    mediaTabs.push({ id: "video", label: "Vidéo de présentation", icon: "🎬" });
+  }
+  if (project.moodboard) {
+    mediaTabs.push({ id: "moodboard", label: project.moodboardTitle || "Moodboard officiel", icon: "🎨" });
+  }
+  if (project.secondaryImage) {
+    mediaTabs.push({ id: "secondary", label: project.secondaryImageTitle || "Planche de style", icon: "📐" });
+  }
+  if (!project.video && !project.moodboard && project.image && !project.image.endsWith(".pdf")) {
+    mediaTabs.push({ id: "image", label: "Visuel du projet", icon: "🖼️" });
+  }
+  if (project.pdfLink) {
+    mediaTabs.push({ id: "pdf", label: "Charte Graphique PDF", icon: "📄" });
+  }
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto bg-black/60 backdrop-blur-md transition-all">
-      <div
-        className="relative w-full max-w-4xl bg-white rounded-3xl overflow-hidden shadow-2xl border border-[var(--color-warm-border)] my-auto max-h-[90vh] flex flex-col animate-fadeInUp"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="modal-title"
-      >
-        {/* Header bar */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--color-warm-border)] bg-[var(--color-warm-white)]">
-          <div className="flex items-center gap-3">
-            <span className="text-xs font-semibold uppercase tracking-wider px-3 py-1 rounded-full bg-[var(--color-rose-pale)] text-[var(--color-rose-primary)]">
-              {project.categoryLabel}
-            </span>
-            <span className="text-xs text-[var(--color-ink-muted)]">
-              Projet #{project.number}
-            </span>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-full text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-black/5 transition-colors"
-            aria-label="Fermer la modale"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
-        </div>
-
-        {/* Scrollable Content */}
-        <div className="overflow-y-auto p-6 sm:p-8 space-y-8">
-          {/* Main video or image banner */}
-          <div>
-            <div className="relative aspect-video rounded-2xl overflow-hidden bg-neutral-950 border border-[var(--color-warm-border)] shadow-inner flex items-center justify-center">
-              {project.video ? (
-                <video
-                  src={project.video}
-                  poster={project.thumbnail || project.image}
-                  controls
-                  playsInline
-                  preload="metadata"
-                  className="w-full h-full object-contain"
-                >
-                  <source src={project.video} type="video/mp4" />
-                  Votre navigateur ne supporte pas la lecture directe de cette vidéo.
-                </video>
-              ) : project.image && project.image.endsWith(".pdf") ? (
-                <div className="w-full h-full flex flex-col items-center justify-center p-8 bg-[var(--color-warm-white)] text-center">
-                  <div className="w-20 h-20 rounded-2xl bg-[var(--color-rose-pale)] border border-[var(--color-rose-blush)] flex items-center justify-center mb-4">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-[var(--color-rose-primary)]">
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                      <polyline points="14 2 14 8 20 8" />
-                      <line x1="16" y1="13" x2="8" y2="13" />
-                      <line x1="16" y1="17" x2="8" y2="17" />
-                      <polyline points="10 9 9 9 8 9" />
-                    </svg>
-                  </div>
-                  <p className="font-body text-lg text-[var(--color-ink)] font-semibold mb-2">Charte Graphique PDF</p>
-                  <p className="font-body text-sm text-[var(--color-ink-muted)] mb-4">Consultez le document officiel en haute définition</p>
-                  <a
-                    href={project.pdfLink || project.image}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 bg-[var(--color-rose-primary)] text-white px-5 py-2.5 rounded-full text-sm font-medium hover:bg-[var(--color-rose-deep)] transition-all shadow-sm"
-                  >
-                    📄 Ouvrir la charte PDF
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
-                  </a>
-                </div>
-              ) : (
-                <img
-                  src={activeImage || project.image}
-                  alt={project.imageAlt}
-                  className="w-full h-full object-contain"
-                  onError={(e) => {
-                    if (project.thumbnail && e.currentTarget.src !== project.thumbnail) {
-                      e.currentTarget.src = project.thumbnail;
-                    }
-                  }}
-                />
-              )}
+    <>
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto bg-black/60 backdrop-blur-md transition-all">
+        <div
+          className="relative w-full max-w-4xl bg-white rounded-3xl overflow-hidden shadow-2xl border border-[var(--color-warm-border)] my-auto max-h-[90vh] flex flex-col animate-fadeInUp"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-title"
+        >
+          {/* Header bar */}
+          <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--color-warm-border)] bg-[var(--color-warm-white)]">
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-semibold uppercase tracking-wider px-3 py-1 rounded-full bg-[var(--color-rose-pale)] text-[var(--color-rose-primary)]">
+                {project.categoryLabel}
+              </span>
+              <span className="text-xs text-[var(--color-ink-muted)]">
+                Projet #{project.number}
+              </span>
             </div>
-
-            {/* Multiple visuals tabs if project has secondary image */}
-            {project.secondaryImage && (
-              <div className="flex flex-wrap items-center gap-2 mt-3">
-                <button
-                  type="button"
-                  onClick={() => setActiveImage(project.image)}
-                  className={`px-4 py-2 rounded-full text-xs font-semibold transition-all ${
-                    activeImage === project.image
-                      ? "bg-[var(--color-rose-primary)] text-white shadow-sm"
-                      : "bg-white border border-[var(--color-warm-border)] text-[var(--color-ink)] hover:border-[var(--color-rose-primary)]"
-                  }`}
-                >
-                  🖼️ Moodboard d'inspiration
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveImage(project.secondaryImage!)}
-                  className={`px-4 py-2 rounded-full text-xs font-semibold transition-all ${
-                    activeImage === project.secondaryImage
-                      ? "bg-[var(--color-rose-primary)] text-white shadow-sm"
-                      : "bg-white border border-[var(--color-warm-border)] text-[var(--color-ink)] hover:border-[var(--color-rose-primary)]"
-                  }`}
-                >
-                  📐 {project.secondaryImageTitle || "Planche de Style"}
-                </button>
-              </div>
-            )}
-          </div>
-
-          <div>
-            <h2 id="modal-title" className="font-display text-3xl sm:text-4xl text-[var(--color-ink)] mb-3">
-              {project.title}
-            </h2>
-            <p className="font-body text-lg text-[var(--color-ink-soft)] leading-relaxed">
-              {project.fullDesc}
-            </p>
-          </div>
-
-          {/* Grid Challenge & Solution */}
-          <div className="grid sm:grid-cols-2 gap-6">
-            <div className="bg-[var(--color-rose-pale)] p-6 rounded-2xl border border-[var(--color-rose-blush)]">
-              <h4 className="font-body font-bold text-[var(--color-rose-deep)] mb-2 flex items-center gap-2 text-sm uppercase tracking-wider">
-                <span>🎯</span> Le Challenge
-              </h4>
-              <p className="font-body text-sm text-[var(--color-ink-soft)] leading-relaxed">
-                {project.challenge}
-              </p>
-            </div>
-            <div className="bg-emerald-50/70 p-6 rounded-2xl border border-emerald-200/60">
-              <h4 className="font-body font-bold text-emerald-800 mb-2 flex items-center gap-2 text-sm uppercase tracking-wider">
-                <span>💡</span> La Solution Apportée
-              </h4>
-              <p className="font-body text-sm text-emerald-950 leading-relaxed">
-                {project.solution}
-              </p>
-            </div>
-          </div>
-
-          {/* Tools & Deliverables */}
-          <div className="grid sm:grid-cols-2 gap-6 pt-2">
-            <div>
-              <h4 className="font-body font-semibold text-sm text-[var(--color-ink)] uppercase tracking-wider mb-3">
-                Outils Utilisés
-              </h4>
-              <div className="flex flex-wrap gap-2">
-                {project.tools.map((tool) => (
-                  <span
-                    key={tool}
-                    className="px-3 py-1.5 rounded-xl bg-[var(--color-warm-muted)] text-[var(--color-ink)] text-xs font-medium border border-[var(--color-warm-border)]"
-                  >
-                    {tool}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <h4 className="font-body font-semibold text-sm text-[var(--color-ink)] uppercase tracking-wider mb-3">
-                Livrables Clés
-              </h4>
-              <ul className="space-y-1.5">
-                {project.deliverables.map((item) => (
-                  <li key={item} className="flex items-center gap-2 text-xs font-body text-[var(--color-ink-soft)]">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-rose-primary)]" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        {/* Footer Actions */}
-        <div className="px-6 py-4 bg-[var(--color-warm-white)] border-t border-[var(--color-warm-border)] flex items-center justify-between flex-wrap gap-3">
-          <button
-            onClick={onClose}
-            className="text-sm font-body text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors"
-          >
-            Fermer l'aperçu
-          </button>
-          <div className="flex items-center gap-3">
-            {project.pdfLink && (
-              <a
-                href={project.pdfLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-white border border-[var(--color-warm-border)] text-[var(--color-ink)] px-4 py-2.5 rounded-full text-sm font-medium hover:border-[var(--color-rose-primary)] transition-all shadow-sm"
-              >
-                📄 Voir la charte PDF
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
-              </a>
-            )}
-            <a
-              href="#contact"
+            <button
               onClick={onClose}
-              className="inline-flex items-center gap-2 bg-[var(--color-rose-primary)] text-white px-5 py-2.5 rounded-full text-sm font-medium hover:bg-[var(--color-rose-deep)] transition-all shadow-sm"
+              className="p-2 rounded-full text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-black/5 transition-colors cursor-pointer"
+              aria-label="Fermer la modale"
             >
-              Discuter d'un projet similaire
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M5 12h14M12 5l7 7-7 7" />
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-            </a>
+            </button>
+          </div>
+
+          {/* Scrollable Content */}
+          <div id="project-modal-scroll" className="overflow-y-auto p-6 sm:p-8 space-y-8">
+            {/* Media Selector Tabs (if multiple media available) */}
+            <div>
+              {mediaTabs.length > 1 && (
+                <div className="flex flex-wrap items-center gap-2 mb-3.5">
+                  {mediaTabs.map((tab) => (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setActiveMedia(tab.id)}
+                      className={`px-4 py-2 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
+                        activeMedia === tab.id
+                          ? "bg-[var(--color-rose-primary)] text-white shadow-sm ring-2 ring-[var(--color-rose-blush)]"
+                          : "bg-white border border-[var(--color-warm-border)] text-[var(--color-ink)] hover:border-[var(--color-rose-primary)]"
+                      }`}
+                    >
+                      <span>{tab.icon}</span>
+                      <span>{tab.label}</span>
+                      {tab.id === "moodboard" && (
+                        <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-amber-100 text-amber-800 ml-0.5">
+                          HD
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Main Media Player / Image / PDF Box */}
+              <div className="relative aspect-video rounded-2xl overflow-hidden bg-neutral-950 border border-[var(--color-warm-border)] shadow-inner flex items-center justify-center">
+                {activeMedia === "video" && project.video ? (
+                  <video
+                    src={project.video}
+                    poster={project.thumbnail || project.image}
+                    controls
+                    playsInline
+                    preload="metadata"
+                    className="w-full h-full object-contain"
+                  >
+                    <source src={project.video} type="video/mp4" />
+                    Votre navigateur ne supporte pas la lecture directe de cette vidéo.
+                  </video>
+                ) : activeMedia === "moodboard" && project.moodboard ? (
+                  <div className="relative w-full h-full flex items-center justify-center bg-stone-900 group">
+                    <img
+                      src={project.moodboard}
+                      alt={`Moodboard officiel ${project.title}`}
+                      className="w-full h-full object-contain cursor-zoom-in transition-transform duration-300 group-hover:scale-[1.02]"
+                      onClick={() => setLightboxImage(project.moodboard!)}
+                      loading="eager"
+                    />
+                    <div className="absolute bottom-3 right-3 flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setLightboxImage(project.moodboard!)}
+                        className="bg-black/80 hover:bg-black text-white text-xs px-3.5 py-2 rounded-full backdrop-blur-md transition-all flex items-center gap-1.5 shadow-lg border border-white/20 cursor-pointer"
+                      >
+                        <span>🔍</span>
+                        <span>Agrandir / Plein écran (HD)</span>
+                      </button>
+                    </div>
+                  </div>
+                ) : activeMedia === "secondary" && project.secondaryImage ? (
+                  <div className="relative w-full h-full flex items-center justify-center bg-stone-900 group">
+                    <img
+                      src={project.secondaryImage}
+                      alt={project.secondaryImageTitle || "Planche de style"}
+                      className="w-full h-full object-contain cursor-zoom-in transition-transform duration-300 group-hover:scale-[1.02]"
+                      onClick={() => setLightboxImage(project.secondaryImage!)}
+                      loading="eager"
+                    />
+                    <div className="absolute bottom-3 right-3 flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setLightboxImage(project.secondaryImage!)}
+                        className="bg-black/80 hover:bg-black text-white text-xs px-3.5 py-2 rounded-full backdrop-blur-md transition-all flex items-center gap-1.5 shadow-lg border border-white/20 cursor-pointer"
+                      >
+                        <span>🔍</span>
+                        <span>Agrandir / Plein écran</span>
+                      </button>
+                    </div>
+                  </div>
+                ) : activeMedia === "pdf" && project.pdfLink ? (
+                  <div className="w-full h-full flex flex-col items-center justify-center p-8 bg-[var(--color-warm-white)] text-center">
+                    <div className="w-20 h-20 rounded-2xl bg-[var(--color-rose-pale)] border border-[var(--color-rose-blush)] flex items-center justify-center mb-4">
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-[var(--color-rose-primary)]">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                        <line x1="16" y1="13" x2="8" y2="13" />
+                        <line x1="16" y1="17" x2="8" y2="17" />
+                        <polyline points="10 9 9 9 8 9" />
+                      </svg>
+                    </div>
+                    <p className="font-body text-lg text-[var(--color-ink)] font-semibold mb-2">Charte Graphique PDF</p>
+                    <p className="font-body text-sm text-[var(--color-ink-muted)] mb-4">Consultez le document officiel en haute définition</p>
+                    <a
+                      href={project.pdfLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 bg-[var(--color-rose-primary)] text-white px-5 py-2.5 rounded-full text-sm font-medium hover:bg-[var(--color-rose-deep)] transition-all shadow-sm"
+                    >
+                      📄 Ouvrir la charte PDF
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
+                    </a>
+                  </div>
+                ) : (
+                  <img
+                    src={project.image}
+                    alt={project.imageAlt}
+                    className="w-full h-full object-contain cursor-zoom-in"
+                    onClick={() => setLightboxImage(project.image)}
+                    onError={(e) => {
+                      if (project.thumbnail && e.currentTarget.src !== project.thumbnail) {
+                        e.currentTarget.src = project.thumbnail;
+                      }
+                    }}
+                  />
+                )}
+              </div>
+            </div>
+
+            <div>
+              <h2 id="modal-title" className="font-display text-3xl sm:text-4xl text-[var(--color-ink)] mb-3">
+                {project.title}
+              </h2>
+              <p className="font-body text-lg text-[var(--color-ink-soft)] leading-relaxed">
+                {project.fullDesc}
+              </p>
+            </div>
+
+            {/* Grid Challenge & Solution */}
+            <div className="grid sm:grid-cols-2 gap-6">
+              <div className="bg-[var(--color-rose-pale)] p-6 rounded-2xl border border-[var(--color-rose-blush)]">
+                <h4 className="font-body font-bold text-[var(--color-rose-deep)] mb-2 flex items-center gap-2 text-sm uppercase tracking-wider">
+                  <span>🎯</span> Le Challenge
+                </h4>
+                <p className="font-body text-sm text-[var(--color-ink-soft)] leading-relaxed">
+                  {project.challenge}
+                </p>
+              </div>
+              <div className="bg-emerald-50/70 p-6 rounded-2xl border border-emerald-200/60">
+                <h4 className="font-body font-bold text-emerald-800 mb-2 flex items-center gap-2 text-sm uppercase tracking-wider">
+                  <span>💡</span> La Solution Apportée
+                </h4>
+                <p className="font-body text-sm text-emerald-950 leading-relaxed">
+                  {project.solution}
+                </p>
+              </div>
+            </div>
+
+            {/* Dedicated Moodboard Highlight Section */}
+            {project.moodboard && (
+              <div className="bg-gradient-to-br from-amber-50/70 via-white to-emerald-50/60 p-6 sm:p-7 rounded-2xl border border-amber-200/70 space-y-4 shadow-xs">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center text-xl shadow-xs">
+                      🎨
+                    </div>
+                    <div>
+                      <h4 className="font-display text-xl text-[var(--color-ink)] font-bold">
+                        {project.moodboardTitle || "Moodboard Officiel & Univers Visuel"}
+                      </h4>
+                      <p className="font-body text-xs text-[var(--color-ink-soft)]">
+                        Inspirations, chromatisme, textures et direction artistique
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    {activeMedia !== "moodboard" && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveMedia("moodboard");
+                          const scrollEl = document.getElementById("project-modal-scroll");
+                          if (scrollEl) scrollEl.scrollTo({ top: 0, behavior: "smooth" });
+                        }}
+                        className="px-3.5 py-1.5 rounded-full bg-white border border-amber-300 text-amber-900 text-xs font-semibold hover:bg-amber-100 transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <span>👁️</span>
+                        <span>Afficher ci-dessus</span>
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => setLightboxImage(project.moodboard!)}
+                      className="px-3.5 py-1.5 rounded-full bg-amber-800 text-white text-xs font-semibold hover:bg-amber-900 transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <span>🔍</span>
+                      <span>Plein écran HD</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="grid sm:grid-cols-3 gap-5 pt-2 items-center">
+                  <div
+                    onClick={() => setLightboxImage(project.moodboard!)}
+                    className="sm:col-span-1 relative aspect-4/3 rounded-xl overflow-hidden cursor-zoom-in group shadow-md border border-white"
+                  >
+                    <img
+                      src={project.moodboard}
+                      alt="Aperçu Moodboard"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-semibold gap-1">
+                      <span>🔍</span> Agrandir HD
+                    </div>
+                  </div>
+
+                  <div className="sm:col-span-2 space-y-3">
+                    <p className="font-body text-xs sm:text-sm text-[var(--color-ink-soft)] leading-relaxed">
+                      {project.id === "proj-tollou-daba"
+                        ? "Le moodboard de Tollou Daba capture l'essence vivrière et agroécologique du Sénégal : semences fertiles, cultures maraîchères (mangues fraîches, melons gorgés de soleil, pommes de terre, choux) et tonalités de terroir qui ancrent la marque."
+                        : "Ce moodboard structure les références visuelles clés : harmonie des couleurs, ambiance émotionnelle, styles d'illustration et codes graphiques."}
+                    </p>
+
+                    {project.id === "proj-tollou-daba" && (
+                      <div className="flex flex-wrap items-center gap-2 pt-1">
+                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white border border-amber-200 text-xs font-mono shadow-2xs">
+                          <span className="w-3.5 h-3.5 rounded-full shadow-xs" style={{ backgroundColor: "#FBC02D" }}></span>
+                          <span className="font-bold text-[var(--color-ink)]">#FBC02D</span>
+                          <span className="text-[10px] text-[var(--color-ink-muted)]">Ocre Solaire</span>
+                        </div>
+                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white border border-emerald-200 text-xs font-mono shadow-2xs">
+                          <span className="w-3.5 h-3.5 rounded-full shadow-xs" style={{ backgroundColor: "#045630" }}></span>
+                          <span className="font-bold text-[var(--color-ink)]">#045630</span>
+                          <span className="text-[10px] text-[var(--color-ink-muted)]">Vert Végétal</span>
+                        </div>
+                      </div>
+                    )}
+                    {project.id === "proj-moodboard-sheet" && (
+                      <div className="flex flex-wrap items-center gap-2 pt-1">
+                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white border border-blue-200 text-xs font-mono shadow-2xs">
+                          <span className="w-3.5 h-3.5 rounded-full shadow-xs" style={{ backgroundColor: "#3B60AA" }}></span>
+                          <span className="font-bold text-[var(--color-ink)]">#3B60AA</span>
+                          <span className="text-[10px] text-[var(--color-ink-muted)]">Bleu Ciel</span>
+                        </div>
+                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white border border-pink-200 text-xs font-mono shadow-2xs">
+                          <span className="w-3.5 h-3.5 rounded-full shadow-xs" style={{ backgroundColor: "#E9417A" }}></span>
+                          <span className="font-bold text-[var(--color-ink)]">#E9417A</span>
+                          <span className="text-[10px] text-[var(--color-ink-muted)]">Rose Corail</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Tools & Deliverables */}
+            <div className="grid sm:grid-cols-2 gap-6 pt-2">
+              <div>
+                <h4 className="font-body font-semibold text-sm text-[var(--color-ink)] uppercase tracking-wider mb-3">
+                  Outils Utilisés
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {project.tools.map((tool) => (
+                    <span
+                      key={tool}
+                      className="px-3 py-1.5 rounded-xl bg-[var(--color-warm-muted)] text-[var(--color-ink)] text-xs font-medium border border-[var(--color-warm-border)]"
+                    >
+                      {tool}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <h4 className="font-body font-semibold text-sm text-[var(--color-ink)] uppercase tracking-wider mb-3">
+                  Livrables Clés
+                </h4>
+                <ul className="space-y-1.5">
+                  {project.deliverables.map((item) => (
+                    <li key={item} className="flex items-center gap-2 text-xs font-body text-[var(--color-ink-soft)]">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-rose-primary)]" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          {/* Footer Actions */}
+          <div className="px-6 py-4 bg-[var(--color-warm-white)] border-t border-[var(--color-warm-border)] flex items-center justify-between flex-wrap gap-3">
+            <button
+              onClick={onClose}
+              className="text-sm font-body text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors cursor-pointer"
+            >
+              Fermer l'aperçu
+            </button>
+            <div className="flex items-center gap-3">
+              {project.pdfLink && (
+                <a
+                  href={project.pdfLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 bg-white border border-[var(--color-warm-border)] text-[var(--color-ink)] px-4 py-2.5 rounded-full text-sm font-medium hover:border-[var(--color-rose-primary)] transition-all shadow-sm"
+                >
+                  📄 Voir la charte PDF
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
+                </a>
+              )}
+              {project.moodboard && (
+                <button
+                  type="button"
+                  onClick={() => setLightboxImage(project.moodboard!)}
+                  className="inline-flex items-center gap-2 bg-amber-700 hover:bg-amber-800 text-white px-4 py-2.5 rounded-full text-sm font-medium transition-all shadow-sm cursor-pointer"
+                >
+                  🎨 Moodboard HD
+                </button>
+              )}
+              <a
+                href="#contact"
+                onClick={onClose}
+                className="inline-flex items-center gap-2 bg-[var(--color-rose-primary)] text-white px-5 py-2.5 rounded-full text-sm font-medium hover:bg-[var(--color-rose-deep)] transition-all shadow-sm"
+              >
+                Discuter d'un projet similaire
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+              </a>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+
+      {/* Lightbox Fullscreen Modal */}
+      {lightboxImage && (
+        <div
+          className="fixed inset-0 z-60 bg-black/92 backdrop-blur-md flex flex-col items-center justify-center p-4 sm:p-8 animate-fadeIn"
+          onClick={() => setLightboxImage(null)}
+        >
+          <div className="w-full max-w-5xl flex items-center justify-between pb-3 text-white">
+            <span className="text-sm font-semibold flex items-center gap-2">
+              <span>🎨</span>
+              <span>Aperçu Haute Définition</span>
+            </span>
+            <button
+              onClick={() => setLightboxImage(null)}
+              className="px-4 py-1.5 rounded-full bg-white/20 hover:bg-white/30 text-white text-xs font-semibold backdrop-blur-md transition-all flex items-center gap-1.5 cursor-pointer"
+            >
+              <span>✕</span> Fermer
+            </button>
+          </div>
+          <div
+            className="relative max-w-5xl max-h-[85vh] overflow-auto rounded-2xl bg-black/40 p-2 flex items-center justify-center shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src={lightboxImage}
+              alt="Aperçu haute résolution"
+              className="max-h-[80vh] w-auto max-w-full object-contain rounded-xl shadow-2xl cursor-default"
+            />
+          </div>
+          <p className="text-white/60 text-xs mt-3 font-body text-center">
+            Cliquez n'importe où en dehors de l'image ou sur la touche Échap pour fermer
+          </p>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -1310,10 +1540,24 @@ function ProjectCardMedia({ project }: { project: Project }) {
       <div className="absolute top-4 right-4 bg-black/70 backdrop-blur-md text-white px-3 py-1 rounded-full text-xs font-mono pointer-events-none">
         #{project.number}
       </div>
-      {project.pdfLink && (
-        <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-[11px] font-semibold text-[var(--color-ink)] shadow-xs flex items-center gap-1.5 pointer-events-none">
-          <span>📄</span>
-          <span>Charte PDF</span>
+      <div className="absolute bottom-4 left-4 flex flex-wrap gap-1.5 pointer-events-none">
+        {project.pdfLink && (
+          <div className="bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-[11px] font-semibold text-[var(--color-ink)] shadow-xs flex items-center gap-1.5">
+            <span>📄</span>
+            <span>Charte PDF</span>
+          </div>
+        )}
+        {project.moodboard && (
+          <div className="bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-[11px] font-semibold text-amber-900 shadow-xs flex items-center gap-1.5">
+            <span>🎨</span>
+            <span>Moodboard</span>
+          </div>
+        )}
+      </div>
+      {project.video && (
+        <div className="absolute bottom-4 right-4 bg-black/75 backdrop-blur-md text-white px-2.5 py-1 rounded-full text-[10px] font-semibold flex items-center gap-1.5 pointer-events-none">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>Vidéo active</span>
         </div>
       )}
       {project.video && (
@@ -1333,7 +1577,12 @@ function ProjectCardMedia({ project }: { project: Project }) {
 function Projects({ onSelectProject }: { onSelectProject: (p: Project) => void }) {
   const [filter, setFilter] = useState<string>("all");
 
-  const filtered = filter === "all" ? PROJECTS : PROJECTS.filter((p) => p.category === filter);
+  const filtered =
+    filter === "all"
+      ? PROJECTS
+      : filter === "Graphisme"
+      ? PROJECTS.filter((p) => p.category === "Graphisme" || Boolean(p.moodboard))
+      : PROJECTS.filter((p) => p.category === filter);
 
   return (
     <RevealSection id="projets" className="py-24 md:py-32 bg-[var(--color-warm-white)]">
@@ -1354,7 +1603,7 @@ function Projects({ onSelectProject }: { onSelectProject: (p: Project) => void }
               { id: "all", label: "Tous les projets" },
               { id: "Branding", label: "Identité Visuelle" },
               { id: "UX/UI", label: "UX/UI Design" },
-              { id: "Canva", label: "Canva & Réseaux" },
+              { id: "Graphisme", label: "Moodboards & Graphisme" },
               { id: "Motion", label: "Motion Design" },
             ].map((tab) => (
               <button
