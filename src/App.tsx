@@ -896,6 +896,19 @@ function Navbar({ onCopyEmail }: { onCopyEmail: () => void }) {
 
         {/* Desktop CTA actions */}
         <div className="hidden lg:flex items-center gap-3">
+          <a
+            href="/cv-daba-diop.pdf"
+            download="CV-Daba-Diop-Assistante-Referente-Digitale.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs font-medium font-body text-[var(--color-ink-soft)] hover:text-[var(--color-rose-primary)] px-3 py-2 rounded-full hover:bg-[var(--color-rose-pale)] transition-all flex items-center gap-1.5"
+            title="Consulter et télécharger mon CV"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
+            </svg>
+            Mon CV
+          </a>
           <button
             onClick={onCopyEmail}
             className="text-xs font-medium font-body text-[var(--color-ink-soft)] hover:text-[var(--color-rose-primary)] px-3 py-2 rounded-full hover:bg-[var(--color-rose-pale)] transition-all flex items-center gap-1.5"
@@ -964,6 +977,16 @@ function Navbar({ onCopyEmail }: { onCopyEmail: () => void }) {
             </li>
           ))}
           <li className="pt-4 flex flex-col gap-2">
+            <a
+              href="/cv-daba-diop.pdf"
+              download="CV-Daba-Diop-Assistante-Referente-Digitale.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={closeMenu}
+              className="inline-flex items-center justify-center gap-2 w-full bg-white border border-[var(--color-warm-border)] text-[var(--color-ink)] py-3 rounded-xl text-sm font-medium hover:border-[var(--color-rose-primary)] transition-colors"
+            >
+              📄 Télécharger mon CV
+            </a>
             <a
               href="#contact"
               onClick={closeMenu}
@@ -1066,8 +1089,10 @@ function Hero({ onCopyEmail }: { onCopyEmail: () => void }) {
               </a>
 
               <a
-                href="assets/Daba-Diop-CV.pdf"
-                download
+                href="/cv-daba-diop.pdf"
+                download="CV-Daba-Diop-Assistante-Referente-Digitale.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 bg-white border border-[var(--color-warm-border)] text-[var(--color-ink)] px-6 py-3.5 rounded-full font-body font-medium text-sm hover:border-[var(--color-rose-primary)] hover:text-[var(--color-rose-primary)] hover:shadow-xs active:scale-95 transition-all"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -1778,6 +1803,28 @@ function Parcours() {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* CV Download banner */}
+        <div className="mt-12 p-6 rounded-2xl bg-white border border-[var(--color-warm-border)] flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xs">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-[var(--color-rose-pale)] text-[var(--color-rose-deep)] flex items-center justify-center text-xl">
+              📄
+            </div>
+            <div>
+              <p className="font-display text-base font-bold text-[var(--color-ink)]">Curriculum Vitæ de Daba Diop</p>
+              <p className="font-body text-xs text-[var(--color-ink-muted)]">Retrouvez l'intégralité de mes compétences et expériences au format PDF</p>
+            </div>
+          </div>
+          <a
+            href="/cv-daba-diop.pdf"
+            download="CV-Daba-Diop-Assistante-Referente-Digitale.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-[var(--color-rose-primary)] hover:bg-[var(--color-rose-deep)] text-white px-5 py-2.5 rounded-full font-body font-semibold text-xs transition-all shadow-xs shrink-0"
+          >
+            <span>⬇️</span> Télécharger mon CV
+          </a>
         </div>
       </div>
     </RevealSection>
