@@ -276,7 +276,7 @@ const SERVICES_DATA = [
   },
   {
     number: "04",
-    title: "Accompagnement & Référente Digitale",
+    title: "Accompagnement & Assistante Référente Digitale",
     short: "Conseil & harmonisation de vos projets",
     description: "Assistance stratégique et opérationnelle pour vos projets digitaux : optimisation de vos supports, suivi de projet et cohérence globale.",
     highlights: ["Audit visuel de vos supports", "Conseils ergonomiques & UI", "Gestion de contenus visuels", "Coordination créative"],
@@ -868,7 +868,7 @@ function Navbar({ onCopyEmail }: { onCopyEmail: () => void }) {
               Daba Diop
             </span>
             <span className="text-[10px] tracking-widest uppercase font-body text-[var(--color-rose-deep)] font-semibold">
-              Référente Digitale
+              Assistante Référente Digitale
             </span>
           </div>
         </a>
@@ -1034,7 +1034,7 @@ function Hero({ onCopyEmail }: { onCopyEmail: () => void }) {
           <div className="lg:col-span-7 space-y-6">
             {/* Pill Tag */}
             <div className="animate-fadeInUp animate-delay-100 opacity-0 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[var(--color-rose-pale)] border border-[var(--color-rose-blush)] text-[var(--color-rose-deep)] text-xs font-semibold tracking-wider uppercase">
-              <span className="text-sm">✨</span> Portfolio 2026 · Référente Digitale
+              <span className="text-sm">✨</span> Portfolio 2026 · Assistante Référente Digitale
             </div>
 
             {/* Main Headline */}
@@ -1050,7 +1050,7 @@ function Hero({ onCopyEmail }: { onCopyEmail: () => void }) {
 
             {/* Elevator Pitch */}
             <p className="animate-fadeInUp animate-delay-300 opacity-0 font-body text-base sm:text-lg text-[var(--color-ink-soft)] leading-relaxed max-w-xl">
-              Je suis <strong className="font-semibold text-[var(--color-ink)]">Daba Diop</strong>, référente digitale et designer passionnée basée à Dakar. J'accompagne marques et projets dans la création d'expériences visuelles mémorables — du design graphique à l'UX/UI avec Canva, Figma et une approche centrée sur l'humain.
+              Je suis <strong className="font-semibold text-[var(--color-ink)]">Daba Diop</strong>, assistante référente digitale et designer passionnée basée à Dakar. J'accompagne marques et projets dans la création d'expériences visuelles mémorables — du design graphique à l'UX/UI avec Canva, Figma et une approche centrée sur l'humain.
             </p>
 
             {/* Action Buttons Row */}
@@ -1118,7 +1118,7 @@ function Hero({ onCopyEmail }: { onCopyEmail: () => void }) {
               <div className="relative w-72 h-96 sm:w-80 sm:h-[440px] rounded-3xl overflow-hidden bg-[var(--color-rose-pale)] border-2 border-white shadow-2xl">
                 <img
                   src="/photo/ODC-Shoot-P8-2026-12.jpg"
-                  alt="Daba Diop - Portrait professionnel Référente digitale & UX/UI Designer"
+                  alt="Daba Diop - Portrait professionnel Assistante référente digitale & UX/UI Designer"
                   className="w-full h-full object-cover object-top hover:scale-105 transition-transform duration-700 ease-out"
                   loading="eager"
                   onError={(e) => {
@@ -1135,7 +1135,7 @@ function Hero({ onCopyEmail }: { onCopyEmail: () => void }) {
                 <div className="absolute bottom-4 left-4 right-4 bg-white/90 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/60 shadow-md flex items-center justify-between">
                   <div>
                     <p className="font-display text-sm text-[var(--color-ink)] font-bold">Daba Diop</p>
-                    <p className="font-body text-[10px] text-[var(--color-rose-deep)] font-medium">Référente Digitale</p>
+                    <p className="font-body text-[10px] text-[var(--color-rose-deep)] font-medium">Assistante Référente Digitale</p>
                   </div>
                   <span className="text-xs bg-[var(--color-rose-pale)] px-2.5 py-1 rounded-full text-[var(--color-rose-primary)] font-bold">
                     ODC
@@ -1675,7 +1675,7 @@ function Parcours() {
   const timelineData = [
     {
       type: "formation",
-      title: "Formation Référente Digitale & Design",
+      title: "Formation Assistante Référente Digitale & Design",
       org: "Orange Digital Center (ODC) · Dakar",
       period: "2024 - 2026",
       desc: "Programme intensif en compétences numériques, design graphique, ergonomie web, communication digitale et gestion de projets innovants.",
@@ -1691,7 +1691,7 @@ function Parcours() {
     },
     {
       type: "experience",
-      title: "Référente Digitale & Créatrice de Contenu",
+      title: "Assistante Référente Digitale & Créatrice de Contenu",
       org: "Projets & Collaborations · Dakar",
       period: "2025 - Présent",
       desc: "Conception de chartes graphiques, kits Canva pour réseaux sociaux et refonte de maquettes d'applications mobiles.",
@@ -1837,7 +1837,7 @@ function Contact({ onCopyEmail }: { onCopyEmail: () => void }) {
             </div>
 
             <p className="font-body text-[#c4b5b0] text-sm sm:text-base leading-relaxed">
-              Vous avez un projet de création visuelle, un besoin en UX/UI ou souhaitez intégrer une référente digitale passionnée à votre équipe ? Je suis à votre écoute !
+              Vous avez un projet de création visuelle, un besoin en UX/UI ou souhaitez intégrer une assistante référente digitale passionnée à votre équipe ? Je suis à votre écoute !
             </p>
 
             <div className="space-y-4 pt-2">
@@ -2029,7 +2029,7 @@ function Footer() {
           </span>
           <div>
             <p className="text-white font-display text-sm font-bold">Daba Diop</p>
-            <p className="text-[10px] text-[#736460]">Référente Digitale · Design & UX/UI · Dakar</p>
+            <p className="text-[10px] text-[#736460]">Assistante Référente Digitale · Design & UX/UI · Dakar</p>
           </div>
         </div>
 
